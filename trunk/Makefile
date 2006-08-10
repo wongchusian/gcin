@@ -7,7 +7,7 @@ include config.mak
 OBJS=gcin.o eve.o win0.o pho.o tsin.o win1.o util.o pho-util.o gcin-conf.o tsin-util.o \
      win-sym.o intcode.o pho-sym.o win-int.o win-pho.o gcin-settings.o table-update.o win-gtab.o \
      gtab.o gtab-util.o phrase.o win-inmd-switch.o pho-dbg.o locale.o win-pho-near.o \
-     gcin-switch.o win-status.o
+     gcin-switch.o win-status.o tray.o eggtrayicon.o
 OBJS_TSLEARN=tslearn.o util.o gcin-conf.o pho-util.o tsin-util.o gcin-send.o pho-sym.o \
              table-update.o locale.o gcin-settings.o
 OBJS_JUYIN_LEARN=juyin-learn.o locale.o util.o pho-util.o pho-sym.o \
@@ -43,7 +43,7 @@ im-srv = im-srv/im-srv.a
 .c.E:
 	$(CC) $(CFLAGS) -E -o $@ $<
 
-PROGS=gcin tsd2a tsa2d phoa2d phod2a tslearn gcin-setup gcin2tab juyin-learn sim2trad
+PROGS=gcin tsd2a tsa2d phoa2d phod2a tslearn gcin-setup gcin2tab juyin-learn sim2trad trad2sim
 PROGS_CV=kbmcv
 
 all:	$(PROGS) $(DATA) $(PROGS_CV) gcin.spec
@@ -66,6 +66,8 @@ juyin-learn:        $(OBJS_JUYIN_LEARN)
 sim2trad:        $(OBJS_sim2trad)
 	$(CC) -o $@ $(OBJS_sim2trad) $(LDFLAGS)
 	rm -f core.*
+trad2sim:	sim2trad
+	ln -s sim2trad trad2sim
 
 gcin-setup:     $(OBJS_gcin_steup)
 	$(CC) -o $@ $(OBJS_gcin_steup) $(LDFLAGS)
@@ -100,7 +102,7 @@ ibin:
 
 install:
 	install -d $(datadir)/icons
-	install gcin.png $(datadir)/icons
+	install gcin.png gcin-tray-sim.png gcin-tray.png $(datadir)/icons
 	install -d $(GCIN_ICON_DIR_i)
 	install -m 644 icons/* $(GCIN_ICON_DIR_i)
 	install -d $(bindir)

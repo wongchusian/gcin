@@ -1216,7 +1216,7 @@ int feedkey_pp(KeySym xkey, int kbstate)
   key_press_time = 0;
 
    if (kbstate & (Mod1Mask|Mod1Mask)) {
-       return 0;
+     return 0;
    }
 
 
@@ -1538,7 +1538,7 @@ other_keys:
              ph_sta = -1;
 
              for(i=c_idx; i < c_len; i++) {
-               draw_underline(i);
+                draw_underline(i);
              }
            }
          } else
@@ -1630,9 +1630,8 @@ asc_char:
           }
         }
 
-
         if (xkey > 127)
-          return 1;
+          return 0;
 
         u_char tt=xkey;
         shift_ins();
@@ -1662,8 +1661,9 @@ asc_char:
         drawcursor();
         return 1;
    } else { /* pho */
-     if (xkey > 127)
+     if (xkey > 127) {
        return 0;
+     }
 
      // for hsu & et26
      if (strchr(hsu_punc, xkey) && !phkbm.phokbm[xkey][0].num)
