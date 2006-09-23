@@ -1,9 +1,0 @@
-wc -l *.[ch]
-cp ~/.gcin/tsin.src data
-cd ..
-rm -fr gcin.tmp
-cp -a gcin gcin.tmp
-cd gcin.tmp
-make clean
-cd ..
-tar cvfj gcin.tbz gcin.tmp
