@@ -1,4 +1,0 @@
-cj:   yhmbc, then 2, should be able to select
-      yhmbc, type a, should put the first one automatically and enter 'a'
-
-dayi: 6 space keypad6
