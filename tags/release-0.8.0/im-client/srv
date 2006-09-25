@@ -1,7 +1,0 @@
-#!/bin/bash
-
-rm -f core.*
-make
-export GCIN_XIM=gcin_test
-pkill gcin.test
-../gcin.test &

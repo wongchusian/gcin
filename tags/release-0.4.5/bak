@@ -1,3 +1,0 @@
-make clean
-wc -l *.[ch]
-cp ~/.gcin/tsin.src data

@@ -1,7 +1,0 @@
-export GCIN_XIM=gcin_test
-pkill gcin.test
-export LC_ALL=zh_TW.Big5
-export XMODIFIERS=@im=$GCIN_XIM
-sleep 3; gedit &
-gdb ./gcin.test
-pkill gedit

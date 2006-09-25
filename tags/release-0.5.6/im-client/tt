@@ -1,3 +1,0 @@
-export LD_PRELOAD=./gcin-im-client.so
-
-gedit
