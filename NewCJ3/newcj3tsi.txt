@@ -494,7 +494,6 @@ ncj 亂倉打鳥
 need 需要
 net 網路
 now 現在
-one 一個人
 only 只有
 pearl 珍珠
 pet 寵物
