@@ -1,0 +1,11 @@
+--- gcin-1.2.9/data/Makefile.orig	2006-10-07 11:35:07.000000000 +0800
++++ gcin-1.2.9/data/Makefile	2006-11-15 14:17:28.000000000 +0800
+@@ -2,7 +2,7 @@
+ 
+ .SUFFIXES:	.kbmsrc .kbm .cin .gtab
+ 
+-DATA=pho.tab tsin32.idx \
++DATA=pho.tab tsin32.idx NewCJ3.gtab \
+      cj.gtab ar30.gtab dayi3.gtab pinyin.gtab jyutping.gtab cj5.gtab \
+      et.kbm et-asdf.kbm et26.kbm et26-asdf.kbm zo.kbm zo-asdf.kbm \
+      pinyin.kbm pinyin-asdf.kbm \

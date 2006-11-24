@@ -1,0 +1,15 @@
+--- gcin-1.2.1/configure.orig	2006-08-17 09:09:27.000000000 +0800
++++ gcin-1.2.1/configure	2006-08-17 11:02:18.000000000 +0800
+@@ -125,9 +125,9 @@
+ 
+ 
+ OPTFLAGS="-g"
+-if [ $prefix = /usr ]; then
+-  OPTFLAGS="-O"
+-fi
++#if [ $prefix = /usr ]; then
++#  OPTFLAGS="-O"
++#fi
+ 
+ 
+ echo "CC=gcc" > config.mak

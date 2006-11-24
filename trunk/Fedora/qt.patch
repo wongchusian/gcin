@@ -1,0 +1,45 @@
+--- gcin-1.2.2/configure.orig	2006-05-03 10:40:12.000000000 +0800
++++ gcin-1.2.2/configure	2006-08-16 23:03:15.000000000 +0800
+@@ -80,9 +80,9 @@
+ fi
+ 
+ QT_IM='N'
+-for i in qt3 qt4
++for i in qt3 qt-3.3 qt-4
+ do
+-  QT_IM_DIR=/usr/lib/$i/plugins/$LIB/inputmethods
++  QT_IM_DIR=/usr/$LIB/$i/plugins/inputmethods
+   echo "testing if you have QT_IM_MODULE dir:$QT_IM_DIR support"
+   if [ -d  $QT_IM_DIR ]; then
+     QT_IM='Y'
+--- gcin-1.2.2/qt-im/Makefile.orig	2006-08-02 15:36:52.000000000 +0800
++++ gcin-1.2.2/qt-im/Makefile	2006-08-17 13:07:26.000000000 +0800
+@@ -1,16 +1,12 @@
+ include ../config.mak
+ QTIM=$(QT)/plugins/inputmethods
+ IMMODULES=$(libdir)/$(QTIM)
+-ifeq ($(LIB), lib64)
+-	IMMODULES_LOCAL=/usr/lib/$(QT)/plugins/lib64/inputmethods
+-else
+-	IMMODULES_LOCAL=/usr/lib/$(QTIM)
+-endif
+-INCS=-I../im-client -I/usr/lib/$(QT)/include  -I/usr/include/Xft2/X11/Xft  -I/usr/include/fontconfig -I/usr/include/freetype2
++IMMODULES_LOCAL=/usr/$(LIB)/$(QTIM)
++INCS=-I../im-client -I/usr/$(LIB)/$(QT)/include  -I/usr/include/Xft2/X11/Xft  -I/usr/include/fontconfig -I/usr/include/freetype2
+ CXXFLAGS=$(OPTFLAGS) $(INCS) -Wall -D_REENTRANT -fPIC  -DQT_THREAD_SUPPORT -DQT_PLUGIN -DQT_SHARED -DQT_NO_DEBUG
+ OBJS=qgcininputcontextplugin.o qgcininputcontextplugin_my.o qgcininputcontext.o qgcininputcontext_x11.o
+ .SUFFIXES:	.c .cpp .a .so .E .h
+-LDFLAGS=-L/usr/lib/$(QT)/$(LIB) -L/usr/X11R6/$(LIB) -L../im-client -lqt-mt -lmng -ljpeg -lpng -lz \
++LDFLAGS=-L/usr/$(LIB)/$(QT)/lib -L/usr/X11R6/$(LIB) -L../im-client -lqt-mt -lmng -ljpeg -lpng -lz \
+ -lXrender -lXrandr  -lXft -lfontconfig -lgcin-im-client \
+ -lXext -lX11 -lm -lSM -lICE -ldl -lpthread
+ all:	libqgcin.so
+@@ -18,7 +14,7 @@
+ .cpp.E:
+ 	$(CXX) -E $(CFLAGS) $(INCS) $< > $@
+ .h.o:
+-	/usr/lib/$(QT)/bin/moc $< -o $<_moc.cpp
++	/usr/$(LIB)/$(QT)/bin/moc $< -o $<_moc.cpp
+ 	$(CXX) -c -pipe $(CXXFLAGS) $(INCS) $<_moc.cpp -o $@
+ 
+ libqgcin.so: $(OBJS)

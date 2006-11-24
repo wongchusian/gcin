@@ -1,0 +1,309 @@
+Name:           gcin
+Version:        1.3.0.1
+Release:        1%{?dist}
+Summary:        Input method for Traditional Chinese
+
+Group:          System Environment/Libraries
+License:        LGPL
+URL:            http://cle.linux.org.tw/gcin/
+Source0:        http://cle.linux.org.tw/gcin/download/%{name}-%{version}.tar.bz2
+Source1:        gcin.conf
+Source2:        gcinicon.tgz
+Source3:        NewCJ3.cin
+Patch1:         im-client.patch
+Patch2:         qt.patch
+Patch3:         configure.patch
+Patch4:         newcj3.patch
+Patch5:         tray.patch
+Patch6:         gcin_update.patch
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  qt-devel, gtk2-devel, desktop-file-utils
+Requires:       gtk2
+Requires(post): %{_sbindir}/alternatives, desktop-file-utils
+Requires(preun): %{_sbindir}/alternatives
+Requires(postun): desktop-file-utils
+
+%description
+Gcin is an input method for Traditional Chinese with a GTK user interface.
+
+%prep
+%setup -q -a 2
+%patch1 -p1 -b .im-client
+%patch2 -p1 -b .qt
+%patch3 -p1 -b .configure
+%patch4 -p1 -b .newcj3
+%patch5 -p1 -b .tray
+%patch6 -p1 -b .up
+#cp -f gcinicon/gtab.list data/
+#cp -f gcinicon/*.png icons/
+find . -name \*.h -o -name \*.c | xargs chmod ugo-x 
+sed -i.strip -e 's|install[ \t][ \t]*-s|install|' Makefile
+echo "#!/bin/bash" > scripts/noseeing-inst.tmp
+cat scripts/noseeing-inst >> scripts/noseeing-inst.tmp
+cat scripts/noseeing-inst.tmp > scripts/noseeing-inst
+cp -f %{SOURCE3} data/
+
+%build
+./configure --prefix=%{_prefix} --libdir=%{_libdir}
+perl -pi -e "s/^(OPTFLAGS.*=)/\1 %{optflags} /" config.mak
+make
+#make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/X11/xinit/xinput.d
+install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/X11/xinit/xinput.d/gcin
+rm -f $RPM_BUILD_ROOT/%{_datadir}/control-center-2.0/capplets/gcin-setup.desktop
+# devel files {
+rm -f $RPM_BUILD_ROOT/%{_includedir}/gcin-im-client.h
+rm -f $RPM_BUILD_ROOT/%{_libdir}/libgcin-im-client.so
+# }
+rm -f $RPM_BUILD_ROOT/%{_docdir}/gcin-%{version}/Changelog
+rm -f $RPM_BUILD_ROOT/%{_docdir}/gcin-%{version}/README
+desktop-file-install \
+  --delete-original \
+  --vendor fedora \
+  --dir ${RPM_BUILD_ROOT}/%{_datadir}/applications \
+  --add-category X-Fedora \
+  ${RPM_BUILD_ROOT}/%{_datadir}/applications/gcin-setup.desktop
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post
+/sbin/ldconfig
+%{_bindir}/update-gtk-immodules %{_target_platform} >/dev/null 2>&1 || :
+update-desktop-database %{_datadir}/applications >/dev/null 2>&1 || :
+%{_sbindir}/alternatives --install %{_sysconfdir}/X11/xinit/xinput.d/zh_TW xinput-zh_TW /etc/X11/xinit/xinput.d/gcin 40
+
+%postun
+/sbin/ldconfig
+%{_bindir}/update-gtk-immodules %{_target_platform} >/dev/null 2>&1 || :
+update-desktop-database %{_datadir}/applications >/dev/null 2>&1 || :
+
+%preun
+if [ $1 -eq 0 ]; then
+  %{_sbindir}/alternatives --remove xinput-zh_TW %{_sysconfdir}/X11/xinit/xinput.d/gcin >/dev/null 2>&1 || :
+fi
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING Changelog README
+%config(noreplace) %{_sysconfdir}/X11/xinit/xinput.d/gcin
+%{_bindir}/gcin*
+%{_bindir}/juyin-learn
+%{_bindir}/pho*
+%{_bindir}/sim2trad
+%{_bindir}/trad2sim
+%{_bindir}/ts*
+%{_datadir}/applications/fedora-gcin-setup.desktop
+%{_datadir}/gcin/
+%{_datadir}/icons/gcin/
+%{_datadir}/icons/gcin*.png
+%{_mandir}/*/*
+%{_libdir}/menu/gcin*
+%{_libdir}/gtk-2.0/immodules/im-gcin.so
+%{_libdir}/qt-3.3/plugins/inputmethods/libqgcin.so
+%{_libdir}/libgcin-im-client.so*
+
+%changelog
+* Thu Nov 23 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.3.0.1-1
+- update to 1.3.0.1
+
+* Wed Nov 15 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.9-2
+- add tray.patch
+
+* Wed Nov 15 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.9-1
+- update to 1.2.9
+- add NewCJ3.cin
+
+* Fri Oct 20 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.8-1
+- update to 1.2.8
+
+* Mon Oct 09 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.7-1
+- update to 1.2.7
+
+* Tue Sep 26 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.6-1
+- update to 1.2.6
+
+* Fri Sep 08 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.5-1
+- update to 1.2.5
+
+* Fri Sep 08 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.4-2
+- fix x86_64 build problems
+
+* Tue Sep 05 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.4-1
+- update to 1.2.4
+
+* Fri Sep 01 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.3-3
+- make tag and make build again
+
+* Fri Sep 01 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.3-2
+- make new-sources to upload new source tarball
+
+* Fri Sep 01 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.3-1
+- update to 1.2.3
+
+* Tue Aug 29 2006 Chung-Yen Chang <candyz0416@gmail.com> - 1.2.2-13
+- typo fix
+
+* Thu Aug 24 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-12
+- modify spec file only for fc5 and later (branch the spec file)
+
+* Thu Aug 24 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-11
+- fix to handle fedora tag correctly
+
+* Thu Aug 24 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-10
+- Remove patch5 (not necessary)
+
+* Wed Aug 23 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-9
+- Fix patch5 for fc3 only bug
+
+* Sun Aug 20 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-8
+- Fix changelog
+
+* Sun Aug 20 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-7
+- Remove -devel subpackage
+- install desktop file
+
+* Sat Aug 19 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-6
+- a few more fixes from Jens Petersen
+
+* Sat Aug 19 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-5
+- improvements from Jens Petersen:
+- don't use configure macro
+- add .conf suffix to xinput.d file and update install scripts for fc6
+- move lib to libdir and drop ld.so.conf.d file
+- other minor cleanup
+
+* Sat Aug 19 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-4
+- rebuild 1.2.2-4
+
+* Fri Aug 18 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-3
+- Add COPYING Changelog to doc
+- Use Dist Tag
+
+* Fri Aug 18 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-2
+- fix x86_64 problems
+
+* Tue Aug 17 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.2-1
+- rebuild 1.2.2-1
+
+* Tue Aug 17 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.1-7
+- rebuild 1.2.1-7
+
+* Wed Aug 16 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.1-4
+- rebuild 1.2.1-4
+
+* Thu Jul 13 2006 Chung-Yen Chang <candyz@cle.linux.org.tw> - 1.2.1-1
+- update to 1.2.1
+
+* Mon May 08 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.2.0
+
+* Mon May 01 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.9
+
+* Mon Apr 03 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.8
+
+* Wed Mar 29 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- rebuild for FC5
+
+* Wed Feb 22 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.7
+
+* Thu Feb 02 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.6
+
+* Sat Jan 07 2006 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.5
+
+* Mon Dec 19 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.4-2
+
+* Mon Dec 12 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.4
+
+* Mon Nov 21 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.3
+
+* Tue Nov 08 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.2
+
+* Sun Oct 30 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.1
+
+* Mon Oct 24 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.1.0
+
+* Mon Oct 03 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.9
+
+* Mon Sep 26 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.8
+
+* Mon Sep 19 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.7
+
+* Mon Sep 05 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.4
+
+* Mon Aug 22 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.3
+
+* Wed Aug 10 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.2
+
+* Fri Jul 08 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.1
+
+* Mon Jun 27 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 1.0.0
+
+* Thu Jun 23 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.9
+
+* Thu Jun 16 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- rebuild for fc4
+
+* Tue May 31 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.7
+
+* Tue May 19 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.6
+
+* Tue May 12 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.5
+
+* Wed May 04 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.3
+
+* Mon Apr 25 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- fix alternatives
+
+* Fri Apr 22 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.2
+
+* Sat Apr 16 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.1
+
+* Tue Apr 05 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.9.0
+
+* Tue Mar 22 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.8.9
+
+* Sat Mar 14 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.8.8
+
+* Sat Mar 08 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.8.7
+
+* Sat Mar 05 2005 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- update to 0.8.6
+
+* Mon Aug 23 2004 Chung-Yen Chang <candyz@cle.linux.org.tw>
+- frist build for Fedora Core 2
